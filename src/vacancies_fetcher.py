@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.companies_fetcher import HeadHunterCompanies
+
 import requests
 
 from src.logger import logger_setup
@@ -14,10 +14,10 @@ class BaseVacancyParser(ABC):
         pass
 
     @abstractmethod
-    def squeeze(self):
+    def filter_data(self):
         pass
 
-class HeadHunterAPI(BaseVacancyParser):
+class HeadHunterVacancies(BaseVacancyParser):
     """Class-connector to hh.ru API for getting open vacancies of desired companies"""
 
     def __init__(self):
@@ -50,9 +50,9 @@ class HeadHunterAPI(BaseVacancyParser):
                 api_logger.info("Vacancies successfully added to list")
             page_number += 1
 
-    def squeeze(self) -> list:
+    def filter_data(self) -> list:
         """Choosing only useful information from api response and returning filtered list with salary in RUB"""
-        squeezed_info = []
+        filtered_data = []
         for vacancy in self.vacancies:
             try:
                 if vacancy.get("salary").get("currency") == "RUR":
@@ -60,38 +60,10 @@ class HeadHunterAPI(BaseVacancyParser):
                     current_vacancy["name"] = vacancy["name"]
                     current_vacancy["salary"] = vacancy.get("salary")
                     current_vacancy["url"] = vacancy["alternate_url"]
-                    current_vacancy["requirement"] = vacancy["snippet"].get("requirement")
+                    current_vacancy['experience'] = vacancy['experience']['name']
+                    current_vacancy['employer'] = vacancy['employer']['name']
                     del current_vacancy["salary"]["gross"]
-                    squeezed_info.append(current_vacancy)
+                    filtered_data.append(current_vacancy)
             except AttributeError:
                 continue
-        return squeezed_info
-
-my_list = [
-    "HTS",
-    "ООО Роболайн",
-    "Doubletapp",
-    "SL Soft",
-    "Itwis",
-    "InlyIT",
-    "Skillline",
-    "Mindbox",
-    "SPRINTHOST",
-    "Voximplant",
-]
-
-
-pars = HeadHunterCompanies(my_list)
-
-pars.prepare_to_fetch()
-
-
-pars.get_companies_info()
-
-vac = HeadHunterAPI()
-
-vac.fetch_vacancies(1, pars.id_list)
-
-print(vac.vacancies)
-
-print(pars.total_vacancies)
+        return filtered_data

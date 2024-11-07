@@ -84,7 +84,11 @@ class HeadHunterCompanies(BaseCompaniesParser):
                 api_logger.info(f"Did not found id for {company['name']}")
             else:
                 self.__total_vacancies += company_info['items'][0]['open_vacancies']
-                self.__id_list.append(company["id"])
+
+
+    def get_companies_id(self):
+        """Creating list of companies id for further vacancies search"""
+        self.__id_list = [company['id'] for company in self.__companies_name_id]
 
 my_list = [
     "HTS",
