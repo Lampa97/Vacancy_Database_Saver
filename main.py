@@ -2,14 +2,16 @@ from src.companies_fetcher import HeadHunterCompanies
 
 from src.vacancies_fetcher import HeadHunterVacancies
 
+from src.db_manager import DBManager
+
 
 my_list = [
-    "HTS",
-    "ООО Роболайн",
+    "Pooling",
+    "Amigoweb",
     "Doubletapp",
-    "SL Soft",
-    "Itwis",
     "InlyIT",
+    "PUSK",
+    "Digital Sail",
     "Skillline",
     "Mindbox",
     "SPRINTHOST",
@@ -28,10 +30,23 @@ pars.get_companies_id()
 
 vac = HeadHunterVacancies()
 
-vac.fetch_vacancies(1, pars.id_list)
+vac.fetch_vacancies(pars.id_list)
 
 vacs = vac.filter_data()
 
-print(vacs)
 
-print(pars.total_vacancies)
+db = DBManager('postgres', 'Chelsea1905')
+
+db.create_database()
+
+db.fill_up_tables(pars.companies_list, vacs)
+
+# db.get_companies_and_vacancies_count()
+#
+# db.get_all_vacancies()
+#
+# db.get_avg_salary()
+#
+# db.get_vacancies_with_higher_salary()
+
+db.get_vacancies_with_keyword('разр')
