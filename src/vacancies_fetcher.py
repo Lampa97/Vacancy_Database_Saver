@@ -4,7 +4,7 @@ import requests
 
 from src.logger import logger_setup
 
-api_logger = logger_setup()
+vacancies_logger = logger_setup()
 
 class BaseVacancyParser(ABC):
     """Abstract class for vacancy parsers"""
@@ -42,12 +42,12 @@ class HeadHunterVacancies(BaseVacancyParser):
         """Fetching vacancies from HeadHunter"""
         page_number = 0
         while page_number <= abs(pages_amount):
-            api_logger.info(f"Parsing page number: {page_number}")
+            vacancies_logger.info(f"Parsing page number: {page_number}")
             response = requests.get(self.__url, headers=self.__headers, params={"page": page_number, "per_page": 100, 'employer_id': employers_id})
             if response.status_code == 200:
                 vacancies = response.json()["items"]
                 self.vacancies.extend(vacancies)
-                api_logger.info("Vacancies successfully added to list")
+                vacancies_logger.info("Vacancies successfully added to list")
             page_number += 1
 
     def filter_data(self) -> list:
