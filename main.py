@@ -30,7 +30,7 @@ pars.get_companies_id()
 
 vac = HeadHunterVacancies()
 
-vac.fetch_vacancies(0, pars.id_list)
+vac.fetch_vacancies(pars.id_list)
 
 vacs = vac.filter_data()
 
@@ -41,6 +41,12 @@ db.create_database()
 
 db.fill_up_tables(pars.companies_list, vacs)
 
-db.get_companies_and_vacancies_count()
+# db.get_companies_and_vacancies_count()
+#
+# db.get_all_vacancies()
+#
+# db.get_avg_salary()
+#
+# db.get_vacancies_with_higher_salary()
 
-db.get_all_vacancies()
+db.get_vacancies_with_keyword('разр')

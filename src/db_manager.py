@@ -24,7 +24,7 @@ class BaseDBManager(ABC):
         pass
 
     @abstractmethod
-    def get_vacancies_with_keyword(self):
+    def get_vacancies_with_keyword(self, keyword):
         pass
 
 
@@ -58,7 +58,7 @@ class DBManager(BaseDBManager):
                 """
                 CREATE TABLE employers (
                     employer_id SERIAL,
-                    name VARCHAR(255) NOT NULL,
+                    employer_name VARCHAR(255) NOT NULL,
                     CONSTRAINT pk_employers_employer_id PRIMARY KEY (employer_id)
                 )
             """
@@ -70,7 +70,7 @@ class DBManager(BaseDBManager):
                 """
                 CREATE TABLE vacancies (
                     vacancy_id SERIAL,
-                    name VARCHAR(255),
+                    vacancy_name VARCHAR(255),
                     from_salary INTEGER,
                     to_salary INTEGER,
                     url TEXT,
@@ -90,16 +90,16 @@ class DBManager(BaseDBManager):
             for employer in companies:
                 cur.execute(
                     f"""
-                    INSERT INTO employers (name) VALUES ('{employer}')
+                    INSERT INTO employers (employer_name) VALUES ('{employer}')
                 """
                 )
             general_logger.info("Successfully inserted data into employers")
             for vacancy in vacancies:
                 cur.execute(
                     f"""
-                    INSERT INTO vacancies (name, from_salary, to_salary, url, employer_id)
+                    INSERT INTO vacancies (vacancy_name, from_salary, to_salary, url, employer_id)
                     VALUES (%s, %s, %s, %s, (SELECT employer_id from employers e
-                    WHERE e.name = '{vacancy['employer']}'))
+                    WHERE employer_name = '{vacancy['employer']}'))
                     """,
                     (vacancy["name"], vacancy["salary"]["from"], vacancy["salary"]["to"], vacancy["url"]),
                 )
@@ -113,9 +113,9 @@ class DBManager(BaseDBManager):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                       SELECT e.name, COUNT(*) from vacancies 
+                       SELECT employer_name, COUNT(*) from vacancies 
                        JOIN employers e USING(employer_id)
-                        GROUP BY e.name
+                        GROUP BY employer_name
                         ORDER BY COUNT(*) DESC
                    """
                         )
@@ -130,13 +130,69 @@ class DBManager(BaseDBManager):
         with conn.cursor() as cur:
             cur.execute(
                 """
-                       SELECT e.name, v.name,  from_salary, to_salary, url from vacancies v
+                       SELECT employer_name, vacancy_name,  from_salary, to_salary, url from vacancies v
                        JOIN employers e USING(employer_id)
-					   ORDER BY e.name
+					   ORDER BY employer_name
                    """
             )
             vacancies = cur.fetchall()
         conn.close()
+        self.__print_vacancies_with_companies(vacancies)
+
+    def get_avg_salary(self):
+        """Method for getting average salary among vacancies"""
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                       SELECT ROUND(AVG(from_salary)), ROUND(AVG(to_salary)) FROM vacancies;
+                   """
+            )
+            avg_salaries = cur.fetchall()
+        conn.close()
+        avg_salary = round((avg_salaries[0][0] + avg_salaries[0][1]) / 2)
+        print(f'Average salary: {avg_salary} RUB')
+
+    def get_vacancies_with_higher_salary(self):
+        """Method for getting vacancies with salaries higher than average"""
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                       SELECT employer_name, vacancy_name,  from_salary, to_salary, url FROM vacancies v
+                        JOIN employers e 
+                        USING(employer_id)
+                        WHERE from_salary > (SELECT (ROUND(AVG(from_salary)) + ROUND(AVG(to_salary))) / 2 
+                        FROM vacancies)
+                        OR
+                        to_salary > (SELECT (ROUND(AVG(from_salary)) + ROUND(AVG(to_salary))) / 2 
+                        FROM vacancies)
+                        ORDER BY employer_name;
+                   """
+            )
+            bigger_than_avg_salaries = cur.fetchall()
+        conn.close()
+        self.__print_vacancies_with_companies(bigger_than_avg_salaries)
+
+    def get_vacancies_with_keyword(self, keyword):
+        """Method for getting vacancies by keyword"""
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
+        with conn.cursor() as cur:
+            cur.execute(
+                f"""
+                       SELECT employer_name, vacancy_name,  from_salary, to_salary, url FROM vacancies v
+                        JOIN employers e 
+                        USING(employer_id)
+                        WHERE LOWER(vacancy_name) LIKE '%{keyword.lower()}%' 
+                        ORDER BY employer_name;
+                   """
+            )
+            keyword_vacancies = cur.fetchall()
+        conn.close()
+        self.__print_vacancies_with_companies(keyword_vacancies)
+
+    @staticmethod
+    def __print_vacancies_with_companies(vacancies):
         for index, vacancy in enumerate(vacancies, 1):
             if vacancy[2] is None:
                 salary = f"До {vacancy[3]} руб."
@@ -145,15 +201,6 @@ class DBManager(BaseDBManager):
             else:
                 salary = f"От {vacancy[2]} до {vacancy[3]} руб."
             print(f"""Vacancy # {index}
-            Company: {vacancy[0]}. Vacancy: {vacancy[1]}
-            Salary: {salary}
-            Link: {vacancy[4]}""")
-
-    def get_avg_salary(self):
-        pass
-
-    def get_vacancies_with_higher_salary(self):
-        pass
-
-    def get_vacancies_with_keyword(self):
-        pass
+                    Company: {vacancy[0]}. Vacancy: {vacancy[1]}
+                    Salary: {salary}
+                    Link: {vacancy[4]}""")
