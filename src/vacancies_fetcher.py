@@ -41,7 +41,7 @@ class HeadHunterVacancies(BaseVacancyParser):
     def fetch_vacancies(self, employers_id: list) -> None:
         """Fetching vacancies from HeadHunter"""
 
-        general_logger.info(f"Searching vacancies")
+        general_logger.info("Searching vacancies")
         response = requests.get(
             self.__url,
             headers=self.__headers,
@@ -51,7 +51,6 @@ class HeadHunterVacancies(BaseVacancyParser):
             vacancies = response.json()["items"]
             self.vacancies.extend(vacancies)
             general_logger.info("Vacancies successfully added to list")
-
 
     def filter_data(self) -> list:
         """Choosing only useful information from api response and returning filtered list with salary in RUB"""

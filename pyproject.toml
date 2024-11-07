@@ -46,6 +46,7 @@ pytest-cov = "^6.0.0"
 requests = "^2.32.3"
 psycopg2 = "^2.9.10"
 types-requests = "^2.32.0.20241016"
+types-psycopg2 = "^2.9.21.20241019"
 
 [tool.pytest.ini_options]
 addopts = "--cov --cov-report term-missing"

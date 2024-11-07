@@ -5,7 +5,7 @@ from src.vacancies_fetcher import HeadHunterVacancies
 from src.db_manager import DBManager
 
 
-my_list = [
+my_companies_list = [
     "Pooling",
     "Amigoweb",
     "Doubletapp",
@@ -19,7 +19,7 @@ my_list = [
 ]
 
 
-pars = HeadHunterCompanies(my_list)
+pars = HeadHunterCompanies(my_companies_list)
 
 pars.prepare_to_fetch()
 

@@ -28,7 +28,6 @@ class HeadHunterCompanies(BaseCompaniesParser):
         self.__headers = {"User-Agent": "HH-User-Agent"}
         self.__companies_name_id = []
         self.__id_list = []
-        self.__total_vacancies = 0
 
     @property
     def url(self):
@@ -45,10 +44,6 @@ class HeadHunterCompanies(BaseCompaniesParser):
     @property
     def companies_name_id(self):
         return self.__companies_name_id
-
-    @property
-    def total_vacancies(self):
-        return self.__total_vacancies
 
     @property
     def id_list(self):
@@ -80,10 +75,8 @@ class HeadHunterCompanies(BaseCompaniesParser):
                 general_logger.info(f"Found id: {company['id']} for {company['name']}")
             except IndexError:
                 general_logger.info(f"Did not found id for {company['name']}")
-            else:
-                self.__total_vacancies += company_info["items"][0]["open_vacancies"]
 
-    def get_companies_id(self):
+    def get_companies_id(self) -> None:
         """Creating list of companies id for further vacancies search"""
         self.__id_list = [company["id"] for company in self.__companies_name_id]
 
