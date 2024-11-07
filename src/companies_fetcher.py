@@ -2,9 +2,7 @@ from abc import ABC, abstractmethod
 
 import requests
 
-from src.logger import logger_setup
-
-companies_logger = logger_setup()
+from src.logger import general_logger
 
 
 class BaseCompaniesParser(ABC):
@@ -65,7 +63,7 @@ class HeadHunterCompanies(BaseCompaniesParser):
     def get_companies_info(self) -> None:
         """Getting company id number from HH API (only companies with active vacancies)"""
         for company in self.__companies_name_id:
-            companies_logger.info(f"Searching company: {company['name']}")
+            general_logger.info(f"Searching company: {company['name']}")
             response = requests.get(
                 url=self.__url,
                 headers=self.__headers,
@@ -79,17 +77,15 @@ class HeadHunterCompanies(BaseCompaniesParser):
             company_info = response.json()
             try:
                 company["id"] = company_info["items"][0]["id"]
-                companies_logger.info(f"Found id: {company['id']} for {company['name']}")
+                general_logger.info(f"Found id: {company['id']} for {company['name']}")
             except IndexError:
-                companies_logger.info(f"Did not found id for {company['name']}")
+                general_logger.info(f"Did not found id for {company['name']}")
             else:
-                self.__total_vacancies += company_info['items'][0]['open_vacancies']
-
+                self.__total_vacancies += company_info["items"][0]["open_vacancies"]
 
     def get_companies_id(self):
         """Creating list of companies id for further vacancies search"""
-        self.__id_list = [company['id'] for company in self.__companies_name_id]
-
+        self.__id_list = [company["id"] for company in self.__companies_name_id]
 
 
 # pars = HeadHunterCompanies(my_list)

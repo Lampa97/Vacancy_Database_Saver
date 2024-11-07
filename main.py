@@ -30,15 +30,17 @@ pars.get_companies_id()
 
 vac = HeadHunterVacancies()
 
-vac.fetch_vacancies(10, pars.id_list)
+vac.fetch_vacancies(0, pars.id_list)
 
 vacs = vac.filter_data()
 
 
-db = DBManager('Chelsea1905')
+db = DBManager('postgres', 'Chelsea1905')
 
 db.create_database()
 
 db.fill_up_tables(pars.companies_list, vacs)
 
-print(pars.total_vacancies)
+db.get_companies_and_vacancies_count()
+
+db.get_all_vacancies()

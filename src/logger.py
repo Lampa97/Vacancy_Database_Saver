@@ -10,3 +10,6 @@ def logger_setup() -> logging.Logger:
     my_logger.addHandler(console_handler)
     my_logger.setLevel(logging.DEBUG)
     return my_logger
+
+
+general_logger = logger_setup()
