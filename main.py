@@ -84,6 +84,8 @@ def set_database_option(option_number: str, database: DBManager) -> bool:
         app_status = False
     else:
         print("Cannot recognize your choice. Please try again.\n")
+    if app_status is True:
+        print("\nYou may continue work or exit the application\n")
     return app_status
 
 
@@ -107,6 +109,7 @@ def main() -> None:
 
     db_manager.fill_up_tables(companies_list, vacancies)
     print("Search is completed and your database is ready! Now you may choose option number to work with vacancies.\n")
+    sleep(2)
     running_app = True
     while running_app:
         user_choice = input(
@@ -120,7 +123,6 @@ def main() -> None:
         )
 
         running_app = set_database_option(user_choice, db_manager)
-        print("\nYou may continue work or exit the application\n")
         sleep(3)
 
     print("Finish working. Thank You!")
