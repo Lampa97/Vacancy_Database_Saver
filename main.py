@@ -92,9 +92,9 @@ def set_database_option(option_number: str, database: DBManager) -> bool:
 def main() -> None:
     companies_list = initial_setup()
 
-    print("Cool! Now it's time to establish connection with your PostGres database\n")
+    print("Cool! Now it's time to establish connection with your PostGreSQL database\n")
 
-    user_name = input("Please enter your PostGres username: ")
+    user_name = input("Please enter your PostGreSQL username: ")
     password = input("Please enter your password: ")
     db_manager = setting_up_database(user_name, password)
     sleep(1)
